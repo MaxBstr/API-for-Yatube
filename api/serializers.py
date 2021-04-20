@@ -14,7 +14,10 @@ User = get_user_model()
 
 
 class PostSerializer(serializers.ModelSerializer):
-    author = serializers.ReadOnlyField(source='author.username')
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+    )
 
     class Meta:
         fields = ('id', 'text', 'author', 'pub_date')
@@ -22,7 +25,10 @@ class PostSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.ReadOnlyField(source='author.username')
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+    )
 
     class Meta:
         fields = ('id', 'author', 'post', 'text', 'created')
@@ -55,14 +61,6 @@ class FollowSerializer(serializers.ModelSerializer):
                 'Нельзя подписаться на самого себя'
             )
 
-        follow_check = Follow.objects.filter(
-            user=user,
-            following=following).exists()
-
-        if follow_check:
-            raise serializers.ValidationError(
-                f'Вы уже подписаны на {following.username}'
-            )
         return data
 
     class Meta:
